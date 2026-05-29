@@ -1,6 +1,8 @@
 import { StatusCodes } from "http-status-codes";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
-export const SuccessResponse = ({
+export const successResponse = ({
   res,
   statusCode = StatusCodes.OK,
   message = "Success",
@@ -12,7 +14,7 @@ export const SuccessResponse = ({
     data,
   };
 
-  res.status(statusCode ?? StatusCodes.OK).json(responseObject);
+  return res.status(statusCode ?? StatusCodes.OK).json(responseObject);
 };
 
 export const errorResponse = ({
@@ -26,7 +28,16 @@ export const errorResponse = ({
     message,
     errors,
   };
-  res.status(statusCode ?? StatusCodes.OK).json({
-    responseObject,
+  return res.status(statusCode).json(responseObject);
+};
+
+export const comparePassword = async (enteredPassword, encryptedPassword) => {
+  const isMatch = bcrypt.compare(enteredPassword, encryptedPassword);
+  return isMatch;
+};
+
+export const generateToken = (userId, first_name, last_name) => {
+  return jwt.sign({ userId, first_name, last_name }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || "30d",
   });
 };
