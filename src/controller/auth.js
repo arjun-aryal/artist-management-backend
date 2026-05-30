@@ -7,6 +7,7 @@ import {
   comparePassword,
   errorResponse,
   generateToken,
+  hashPassword,
   successResponse,
 } from "../utils/index.js";
 import { StatusCodes } from "http-status-codes";
@@ -45,7 +46,7 @@ export const registerUser = async (req, res) => {
         message: "Passwords does not match",
       });
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await hashPassword(password);
     const row = await createuser({
       first_name,
       last_name,

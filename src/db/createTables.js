@@ -16,7 +16,7 @@ export const createTables = async () => {
     await pool.query(`
       DO $$ BEGIN
         CREATE TYPE role_enum AS ENUM (
-          'super-admin',
+          'super_admin',
           'artist_manager',
           'artist'
         );
@@ -51,7 +51,7 @@ export const createTables = async () => {
         dob date,
         gender gender_enum,
         address varchar(255),
-        role_type role_enum,
+        role_type role_enum default 'artist',
         created_at timestamp default current_timestamp,
         updated_at timestamp default current_timestamp
 

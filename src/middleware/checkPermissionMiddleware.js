@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
-import { errorResponse } from "../utils.js";
+import { errorResponse } from "../utils/index.js";
 
-export const checkPermissionMiddleware = (requiredPermission) => {
+const checkPermissionMiddleware = (requiredPermission) => {
   return async (req, res, next) => {
     const userRole = req.userInfo.role;
 
@@ -20,3 +20,5 @@ export const checkPermissionMiddleware = (requiredPermission) => {
     next();
   };
 };
+
+export default checkPermissionMiddleware;

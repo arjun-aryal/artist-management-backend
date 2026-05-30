@@ -7,12 +7,16 @@ export const successResponse = ({
   statusCode = StatusCodes.OK,
   message = "Success",
   data = null,
+  pagination = null,
 }) => {
   const responseObject = {
     success: true,
     message,
     data,
   };
+  if (pagination) {
+    responseObject.pagination = pagination;
+  }
 
   return res.status(statusCode ?? StatusCodes.OK).json(responseObject);
 };
@@ -31,6 +35,10 @@ export const errorResponse = ({
   return res.status(statusCode).json(responseObject);
 };
 
+export const hashPassword = async (password) => {
+  const hashedPassword = bcrypt.hash(password, 10);
+  return hashedPassword;
+};
 export const comparePassword = async (enteredPassword, encryptedPassword) => {
   const isMatch = bcrypt.compare(enteredPassword, encryptedPassword);
   return isMatch;

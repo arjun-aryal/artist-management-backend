@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
-import { getUserRole } from "../repository/users.js";
+import { getUserRole } from "../repository/auth.js";
+import { StatusCodes } from "http-status-codes";
+import { errorResponse } from "../utils/index.js";
 
 const extractToken = (req) => {
   const authHeader = req.headers.authorization;
@@ -24,20 +26,29 @@ const attachUserRole = async (req) => {
   req.userInfo.role = userRole;
 };
 
-const authenticationMiddleware = async (req, resizeBy, next) => {
+const authenticationMiddleware = async (req, res, next) => {
   const token = extractToken(req);
   if (!token) {
-    console.log("Authentication Invalid");
+    return errorResponse({
+      res,
+      statusCode: StatusCodes.UNAUTHORIZED,
+      message: "Authentication Invalid",
+    });
   }
+
   let userInfo;
   try {
     userInfo = decodeToken(token);
     req.userInfo = userInfo;
     await attachUserRole(req);
+    next();
   } catch (error) {
-    console.log("Authentication Invalid");
+    return errorResponse({
+      res,
+      statusCode: StatusCodes.UNAUTHORIZED,
+      message: "Authentication Invalid",
+    });
   }
-  next();
 };
 
 export default authenticationMiddleware;
