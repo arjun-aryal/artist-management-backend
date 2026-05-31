@@ -3,7 +3,7 @@ import { errorResponse } from "../utils/index.js";
 
 const checkPermissionMiddleware = (requiredPermission) => {
   return async (req, res, next) => {
-    const userRole = req.userInfo.role;
+    const userRole = req.userInfo.role_type;
 
     const allowed = Array.isArray(requiredPermission)
       ? requiredPermission.includes(userRole)

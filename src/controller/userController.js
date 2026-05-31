@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import {
   deleteFromTable,
-  getAll,
+  getAllUsers,
   getUserById,
   updateUserTable,
 } from "../repository/userRepository.js";
@@ -13,21 +13,15 @@ import {
 import { createuser } from "../repository/auth.js";
 
 export const listAllUsers = async (req, res) => {
-  const { page, limit } = req.query;
-
+  const query = req.query;
   try {
-    const users = await getAll({
-      tableName: "users",
-      columns: ["id", "first_name", "last_name", "email", "role_type"],
-      page,
-      limit,
-      orderBy: "id",
-      paginate: true,
-    });
+    const users = await getAllUsers(query);
     const pagination = {
       totalPages: users.total,
-      page: Number(page),
-      limit: Number(limit),
+      page: Number(query.page),
+      limit: Number(query.limit),
+      totalPages: users.totalPages,
+      totalRecords: users.totalRecords,
     };
 
     return successResponse({
@@ -58,7 +52,7 @@ export const createUserByAdmin = async (req, res) => {
     dob,
     gender,
     address,
-    role,
+    role_type,
   } = req.body;
 
   const hashedPassword = await hashPassword(password);
@@ -72,7 +66,7 @@ export const createUserByAdmin = async (req, res) => {
       dob,
       gender,
       address,
-      role,
+      role_type,
     });
     return successResponse({
       res,

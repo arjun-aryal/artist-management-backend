@@ -1,6 +1,5 @@
 import express from "express";
 import { validate } from "../middleware/validation.js";
-import { paginationSchema } from "../validators/paginationParams.js";
 import {
   createUserByAdmin,
   deleteUser,
@@ -9,10 +8,7 @@ import {
 } from "../controller/userController.js";
 import checkPermissionMiddleware from "../middleware/checkPermissionMiddleware.js";
 import authenticationMiddleware from "../middleware/authentication.js";
-import {
-  addNewUserSchema,
-  updateUserSchema,
-} from "../validators/userSchema.js";
+import { UserSchema, updateUserSchema } from "../validators/userSchema.js";
 
 const router = express.Router();
 
@@ -20,16 +16,16 @@ router
   .route("/")
   .get(
     authenticationMiddleware,
-    validate(paginationSchema),
-    checkPermissionMiddleware("super_admin"),
+    validate(updateUserSchema),
+    checkPermissionMiddleware(["super_admin", "artist_manager"]),
     listAllUsers,
   );
 router
   .route("/")
   .post(
     authenticationMiddleware,
-    validate(addNewUserSchema),
-    checkPermissionMiddleware("super_admin"),
+    validate(UserSchema),
+    checkPermissionMiddleware(["super_admin", "artist_manager"]),
     createUserByAdmin,
   );
 
@@ -38,7 +34,7 @@ router
   .put(
     authenticationMiddleware,
     validate(updateUserSchema),
-    checkPermissionMiddleware("super_admin"),
+    checkPermissionMiddleware(["super_admin", "artist_manager"]),
     updateUser,
   );
 
@@ -46,8 +42,7 @@ router
   .route("/:id")
   .delete(
     authenticationMiddleware,
-    validate(updateUserSchema),
-    checkPermissionMiddleware("super_admin"),
+    checkPermissionMiddleware(["super_admin", "artist_manager"]),
     deleteUser,
   );
 export default router;

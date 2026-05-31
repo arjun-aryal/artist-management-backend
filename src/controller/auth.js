@@ -24,7 +24,7 @@ export const registerUser = async (req, res) => {
     dob,
     gender,
     address,
-    role,
+    role_type,
   } = req.body;
 
   try {
@@ -56,7 +56,7 @@ export const registerUser = async (req, res) => {
       dob,
       gender,
       address,
-      role,
+      role_type,
     });
 
     return successResponse({

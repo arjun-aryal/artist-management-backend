@@ -51,7 +51,7 @@ export const createTables = async () => {
         dob date,
         gender gender_enum,
         address varchar(255),
-        role_type role_enum default 'artist',
+        role_type role_enum Not null default 'artist',
         created_at timestamp default current_timestamp,
         updated_at timestamp default current_timestamp
 
@@ -62,6 +62,7 @@ export const createTables = async () => {
     await pool.query(`
       create table if not exists artists (
         id serial primary key,
+        user_id INT UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         name varchar(100),
         dob date,
         gender gender_enum,

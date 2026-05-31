@@ -1,36 +1,85 @@
-import { date } from "zod";
 import { query } from "../db/db.js";
 import { buildPagination } from "../utils/paginationHelper.js";
 
-export const getAll = async ({
-  tableName,
-  colunm = ["*"],
-  where = "",
-  whereParams = [],
-  orderBy = "",
+export const getAllUsers = async ({
   page,
   limit,
-  paginate = true,
+  search,
+  role_type,
+  sortBy = "id",
+  order = "ASC",
 }) => {
-  let baseQuery = `select ${colunm.join(",")} from ${tableName}`;
-  if (where) {
-    baseQuery += ` ${where}`;
+  const whereParams = [];
+  const conditions = [];
+  console.log("sortBy", sortBy);
+  if (search) {
+    whereParams.push(`%${search}%`);
+
+    conditions.push(`
+      (
+        CONCAT(first_name, ' ', last_name) ILIKE $${whereParams.length}
+        OR first_name ILIKE $${whereParams.length}
+        OR last_name ILIKE $${whereParams.length}
+        OR email ILIKE $${whereParams.length}
+      )
+    `);
   }
-  if (orderBy) {
-    baseQuery += ` ORDER BY ${orderBy}`;
+
+  if (role_type) {
+    whereParams.push(role_type);
+    conditions.push(`role_type = $${whereParams.length}`);
   }
 
-  const { clause, params } = buildPagination({ page, limit, paginate });
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
-  const finalQuery = `${baseQuery} ${clause}`;
+  // const sortableColumns = {
+  //   id: "id",
+  //   first_name: "first_name",
+  //   last_name: "last_name",
+  //   email: "email",
+  //   role_type: "role_type",
+  //   created_at: "created_at",
+  // };
 
-  const result = await query(finalQuery, [...whereParams, ...params]);
-  // console.log(result);
-  const total = parseInt(result.rowCount);
+  // const orderBy = sortableColumns[sort] || "id";
+  const sortOrder = order?.toUpperCase() === "DESC" ? "DESC" : "ASC";
 
-  return { data: result.rows, total: Math.ceil(total / limit) };
+  const countQuery = `
+    SELECT COUNT(*)::int AS total
+    FROM users
+    ${where}
+  `;
+
+  const { clause, params } = buildPagination({
+    page,
+    limit,
+    startIndex: whereParams.length + 1,
+    paginate: true,
+  });
+
+  const baseQuery = `
+    SELECT
+      id,
+      first_name,
+      last_name,
+      email,
+      address,
+      role_type,
+      COUNT(*) OVER()::int AS total_records
+    FROM users
+    ${where}
+    ORDER BY ${sortBy} ${sortOrder}
+    ${clause}
+  `;
+  const result = await query(baseQuery, [...whereParams, ...params]);
+  const totalRecords = result.rows.length ? result.rows[0].total_records : 0;
+
+  return {
+    data: result.rows,
+    totalPages: Math.ceil(totalRecords / limit),
+    totalRecords,
+  };
 };
-
 export const updateUserTable = async (value) => {
   const {
     first_name,
@@ -40,7 +89,7 @@ export const updateUserTable = async (value) => {
     dob,
     gender,
     address,
-    role,
+    role_type,
     id,
   } = value;
 
@@ -67,7 +116,7 @@ export const updateUserTable = async (value) => {
     dob || null,
     gender || null,
     address || null,
-    role,
+    role_type,
     id,
   ];
 

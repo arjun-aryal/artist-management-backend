@@ -23,7 +23,7 @@ const decodeToken = (token) => {
 
 const attachUserRole = async (req) => {
   const userRole = await getUserRole(req.userInfo.userId);
-  req.userInfo.role = userRole;
+  req.userInfo.role_type = userRole;
 };
 
 const authenticationMiddleware = async (req, res, next) => {

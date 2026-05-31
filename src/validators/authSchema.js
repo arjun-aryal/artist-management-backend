@@ -13,9 +13,9 @@ export const registrationSchema = z.object({
     dob: z.string().date().optional(),
     gender: z.enum(["m", "f", "o"]).optional(),
     address: z.string().max(255).optional(),
-    role: z
-      .enum(["super_admin", "artist_manager", "artist"])
-      .default("super_admin"),
+    role_type: z
+      .enum(["super_admin", "artist_manager"])
+      .default("artist_manager"),
   }),
 });
 
